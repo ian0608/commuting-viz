@@ -5,15 +5,12 @@
 		<script src="third-party/Chart.js"></script>
 		<script src="third-party/jquery.js"></script>
 		<script src="third-party/jquery-ui.js"></script>
+		<script src="third-party/papaparse.js"></script>
 		<link href="third-party/jquery-ui.css" rel="stylesheet">
 	</head>
 	<body>
+		<input id="fileChooser" type="file" />
 		<select id="selectmenu">
-			<option>Slower</option>
-			<option>Slow</option>
-			<option selected="selected">Medium</option>
-			<option>Fast</option>
-			<option>Faster</option>
 		</select>
 	
 		<div id="canvas-holder">
@@ -23,7 +20,21 @@
 
 	<script>
 	
-	$( "#selectmenu" ).selectmenu();
+	$( "#selectmenu" ).hide();
+	
+	$('#fileChooser').change(function() {
+	Papa.parse(($('#fileChooser'))[0].files[0], {
+		complete: function(results) {
+			//console.log(results.data);
+			$.each(results.data.slice(2), function(index, value){
+				console.log(value[0]);
+				$('#selectmenu').append("<option>"+value[0]+"</option>");
+			});
+			$( "#selectmenu" ).selectmenu();
+		}
+	});
+	});
+	
 
 		var pieData = [
 				{

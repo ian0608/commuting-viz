@@ -6,11 +6,45 @@
 		<script src="third-party/jquery.js"></script>
 		<script src="third-party/jquery-ui.js"></script>
 		<script src="third-party/papaparse.js"></script>
+		<script type="text/javascript" src="third-party/jquery-gentleSelect.js"></script>
+		<link href="third-party/jquery-gentleSelect.css" rel="stylesheet">
 		<link href="third-party/jquery-ui.css" rel="stylesheet">
+		
+		<style>
+			body
+			{
+				font-family: sans-serif;
+				margin-left:30px
+			}
+			#canvas-holder
+			{
+				margin-top:40px;
+			}
+			#fileChooser
+			{
+				float:left;
+				margin-right:75px;
+			}
+			#selectmenu
+			{
+				float:right;
+			}
+			span
+			{
+				font-size:small;
+			}
+			li
+			{
+				font-size:small;
+			}
+
+		</style>
 	</head>
 	<body>
-		<input id="fileChooser" type="file" />
-		<select id="selectmenu"></select>
+		<h2>CS 4460 - Homework 6</h2>
+		<h3>Steven Moore and Ian Stainbrook</h3>
+		<div><input id="fileChooser" type="file" /></div>
+		<div><select id="selectmenu"></select></div>
 	
 		<div id="canvas-holder">
 			<canvas id="chart-area" width="300" height="300"/>
@@ -20,68 +54,55 @@
 	<script>
 	
 	var stateData;
-	var sliceAmount = 2;
+	var sliceAmount = 2;	//actual state-by-state data begins at index 2
 	var colors = new Array( "#ACE600", "#FFCC33", "#FF6633", "#33CCFF", "#003DF5", "#CC33FF" );
+	var highlights = new Array( "#C6FF1A", "#FFD966", "#FF8C66", "#66FFD9", "#295EFF", "#D966FF" );
 	
-	var pieData = [
-    {
-        value: 300,
-        color:"#F7464A",
-        highlight: "#FF5A5E",
-        label: "Red"
-    },
-    {
-        value: 50,
-        color: "#46BFBD",
-        highlight: "#5AD3D1",
-        label: "Green"
-    },
-    {
-        value: 100,
-        color: "#FDB45C",
-        highlight: "#FFC870",
-        label: "Yellow"
-    }
-]
 	
 	var ctx = $("#chart-area").get(0).getContext("2d");
-	var myPie = new Chart(ctx).Pie(pieData);
+	var myPie = new Chart(ctx).Pie();
 	
 	$('#selectmenu').hide();
 		
 
 	$('#fileChooser').change(function() {
 	Papa.parse(($('#fileChooser'))[0].files[0], {
-		complete: function(results) {
+		complete: function(results) {	//when finished parsing...
 			stateData = results.data;
 			//console.log(stateData);
 			$.each(stateData.slice(sliceAmount), function(index, value){
 				//console.log(value[0]);
-				$('#selectmenu').append("<option>"+value[0]+"</option>");
+				$('#selectmenu').append("<option>"+value[0]+"</option>");	//dynamically create drop-down
 			});
-			$( "#selectmenu" ).selectmenu();
-			updateForIndex(sliceAmount, stateData);
-			$("#selectmenu").selectmenu({change: function() {
-				var index = (parseInt($("#selectmenu")[0].selectedIndex) + sliceAmount);
-				console.log(index);
-				updateForIndex(index, stateData);
-			}
-		});
-		
-		
-				
-		
-		
+			//$('#selectmenu').gentleSelect();
+			updateForIndex(sliceAmount, stateData);		//implicitly select first state in list
+			$("#selectmenu").gentleSelect({
+				columns: 5,
+				itemWidth: 120,
+			});
+			
+			$("#selectmenu").on('change',
+				function(){	//when selection changes...
+					var index = (parseInt($("#selectmenu")[0].selectedIndex) + sliceAmount);
+					console.log("going to update...");
+					console.log(parseInt($("#selectmenu")[0].selectedIndex));
+					updateForIndex(index, stateData);	//change graph accordingly for selected state
+					}
+				);
 		}
 	});
 	});
 
+		
+		
+
+	
 		function updateForIndex(index, stateData) {
 			var newPieData = [];
-				for ( var i = 2; i <= 7; i++ ) {
+				for ( var i = 2; i <= 7; i++ ) {	//relevant column headers begin at index 2
 					var toPush = {
 									color: colors[i-2],
-									//highlight: colors[i-2],
+									highlight: highlights[i-2],
 									label : stateData[0][i],
 									value : parseInt(stateData[index][i])
 									};
@@ -90,22 +111,9 @@
 				}
 				console.log(newPieData);
 				
-				//myPie.update();
-				myPie.destroy();
-				myPie = new Chart(ctx).Pie(newPieData);
+				myPie.destroy();	//destroy old chart and...
+				myPie = new Chart(ctx).Pie(newPieData, { animationSteps: 50, animationEasing: "linear"});	//create new chart
 				
-				//for ( var j = 2; j <= 7; j++ ) {
-				//	myPie.removeData(j);
-				//}
-				
-				//for ( var k = 2; k <= 7; k++ ) {
-				//	myPie.removeData(j);
-				//}
-				
-				
-				//myPie.addData(newPieData[0]);
-				//pieData = newPieData;
-				//myPie.update();
 		}
 
 

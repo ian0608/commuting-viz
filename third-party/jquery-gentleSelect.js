@@ -5,6 +5,8 @@
  * Copyright (c) 2010 Shawn Chin. 
  * Licensed under the MIT license.
  * 
+ * Modified 2014 Ian Stainbrook
+ *
  * Usage:
  *  (JS)
  *
